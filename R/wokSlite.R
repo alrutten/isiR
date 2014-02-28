@@ -161,6 +161,6 @@ wokParseResult = function(res){
                                        return(out)
                                                                               })
  
-  return(rbind.fil(rec))
+  return(rbind.fill(rec))
  }
 }  
