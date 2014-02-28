@@ -2,7 +2,7 @@
 \alias{wokq}
 \alias{isiR}
 \alias{postLAMRReq}
-\alias(makeLAMRQry}
+\alias{makeLAMRQry}
 
 \title{
 query web of knowledge
