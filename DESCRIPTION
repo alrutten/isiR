@@ -1,0 +1,10 @@
+Package: isiR
+Type: Package
+Title: searchLite and LAMR client for web of knowledge
+Depends: XML, RCurl,reshape,plyr
+Version: 1.0
+Date: 2014-02-28
+Author: AR
+Maintainer: arutten@orn.mpg.de
+Description: execute queries against web of knowledge's searchLite and LAMR apis.
+License: GPL
