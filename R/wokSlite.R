@@ -142,24 +142,25 @@ wokGetRes = function(header,body,wokSliteURL = 'http://search.webofknowledge.com
 wokExtract = function(xmlthing,xpaththing) {
   lapply(getNodeSet(xmlthing,xpaththing),function(x) xmlValue(x))
 }
+
 wokParseResult = function(res){
   
   records = getNodeSet(res,'//records')
   
    rec = lapply(records, function(x) { titles    = wokExtract(x,'//title/value')
-                                       sourceVal = t(wokExtract(x,'//source/value'))
-                                       sourceLab  = t(wokExtract(x,'//source/label'))
+                                       sourceVal = as.vector(wokExtract(x,'//source/value'))
+                                       sourceLab  =t(wokExtract(x,'//source/label'))
                                        authors   = wokExtract(x,'//authors/value')
                                        authorLab = t(paste0('author_',c(1:length(authors))))
-                                       authorVal = t(authors)
+                                       authorVal = as.vector(authors)
                                        doiLoc    = which(grepl('10\\.',wokExtract(x,'//other/value')))
                                        doi       = ifelse(length(doiLoc>0),wokExtract(x,'//other/value')[doiLoc],NA)
                                        uid       = wokExtract(x,'//uid')
-                                       out       = data.frame(titles, sourceVal, authorVal,doi,uid)
+                                       out       = data.frame(titles, sourceVal, authorVal,doi,uid,stringsAsFactors = FALSE)
                                        names(out) = c('title',sourceLab,authorLab,'doi','wok_uid')
                                        return(out)
                                                                               })
  
-  return(do.call(rbind.fill,rec))
+  return(rbind.fil(rec))
  }
 }  
