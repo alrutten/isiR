@@ -53,9 +53,29 @@ postLAMRReq = function(qry,url    = "https://ws.isiknowledge.com/cps/xrpc") {
     cids = paste0(cids,top,body,end)
   }
   
-  wokTree = xmlRoot(xmlTreeParse(paste(wokHeader,cids,wokFooter)))
+  wokTree = paste(wokHeader,cids,wokFooter)
  
-  return(xmlTreeParse(postForm(url,.opts=list("postfields" = saveXML(wokTree)),style='POST'))) # IT WORKS!!
+  h = basicTextGatherer()
+  
+  curlPerform(url=url,
+              postfields=wokTree,
+              writefunction = h$update,
+              verbose = TRUE)
+  res = xmlRoot(xmlTreeParse(h$value()))
+  
+  resList = getNodeSet(res,'/*["fn"]/*["map"]/*["map"]/*["map"]')
+  
+  out = lapply(resList, function(x) {d = getNodeSet(x,'//*["map"]/*["map"]/*["val"]')
+                               values = lapply(d,xmlValue)
+                               names =lapply(d,xmlAttrs)
+                               d = data.frame(values,stringsAsFactors=FALSE)
+                               names(d) = unlist(names)
+                               return(d)
+                             })
+  #lapply(xmlToList(res),function(x) d = rbind(x)
+   #                   data.frame(rbind(x),stringsAsFactors = FALSE))
+  
+  return(rbind.fill(out))
 }
 
 }
@@ -68,7 +88,7 @@ wokq = function(qry,nmatches= 50,first = 1, SID=getWokSID()) {
   
   d = wokGetRes(header = makeWokHeader(SID=SID),
             body = makeWokBody(qry=qry,count=nmatches,first=first)) 
-  dd = wokParseResult(d)
+  dd = wokParseResult(d, nodes = '//records')
   return(dd)
 }
   
@@ -137,30 +157,45 @@ wokGetRes = function(header,body,wokSliteURL = 'http://search.webofknowledge.com
               verbose = TRUE)
   
  res = xmlRoot(xmlTreeParse(h$value()))
-}
+ }
 
 wokExtract = function(xmlthing,xpaththing) {
   lapply(getNodeSet(xmlthing,xpaththing),function(x) xmlValue(x))
 }
 
-wokParseResult = function(res){
+wokParseResult = function(res, nodes){
   
-  records = getNodeSet(res,'//records')
+  records = getNodeSet(res,nodes)
   
-   rec = lapply(records, function(x) { titles    = wokExtract(x,'//title/value')
-                                       sourceVal = as.vector(wokExtract(x,'//source/value'))
-                                       sourceLab  =t(wokExtract(x,'//source/label'))
-                                       authors   = wokExtract(x,'//authors/value')
-                                       authorLab = t(paste0('author_',c(1:length(authors))))
-                                       authorVal = as.vector(authors)
-                                       doiLoc    = which(grepl('10\\.',wokExtract(x,'//other/value')))
-                                       doi       = ifelse(length(doiLoc>0),wokExtract(x,'//other/value')[doiLoc],NA)
-                                       uid       = wokExtract(x,'//uid')
-                                       out       = data.frame(titles, sourceVal, authorVal,doi,uid,stringsAsFactors = FALSE)
-                                       names(out) = c('title',sourceLab,authorLab,'doi','wok_uid')
-                                       return(out)
-                                                                              })
- 
+  rec = lapply(records, function(x) { 
+                          y = xmlToList(x)
+                          d = list()  
+                          for (i in 1:length(y)) {
+                            if (length(y[[i]])>1) { #nodes where variable name is in 'label' tag}
+                              names(y[[i]]) = gsub('1','',c('label',paste0(y[[i]][1],c(1:(length(y[[i]])-1)))))
+                              y[[i]] = y[[i]][-1]
+                              d[[i]] = data.frame(do.call(cbind,y[[i]]),stringsAsFactors = FALSE)
+                            } else d[i] = data.frame(cbind(y[i]),stringsAsFactors = FALSE) #variable name is tag name
+                          }
+                          d = do.call(cbind,d)
+                        })
   return(rbind.fill(rec))
- }
+  
+}
+   #rec = lapply(records, function(x) { titles    = wokExtract(x,'//title/value')
+    #                                   sourceVal = as.vector(wokExtract(x,'//source/value'))
+     #                                  sourceLab  =t(wokExtract(x,'//source/label'))
+      #                                 authors   = wokExtract(x,'//authors/value')
+       #                                authorLab = t(paste0('author_',c(1:length(authors))))
+        #                               authorVal = as.vector(authors)
+         #                              doiLoc    = which(grepl('10\\.',wokExtract(x,'//other/value')))
+          #                             doi       = ifelse(length(doiLoc>0),wokExtract(x,'//other/value')[doiLoc],NA)
+           #                            uid       = wokExtract(x,'//uid')
+            #                           out       = data.frame(titles, sourceVal, authorVal,doi,uid,stringsAsFactors = FALSE)
+             #                          names(out) = c('title',sourceLab,authorLab,'doi','wok_uid')
+              #                         return(out)
+               #                                                               })
+ 
+  #return(rbind.fill(rec))
+# }
 }  
