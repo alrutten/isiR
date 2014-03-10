@@ -35,7 +35,7 @@ sessionID for web of knowledge. If you intend to do more than one query, get a s
 }
 \value{
 \item{wokq }{a dataframe with bibliographical data for each match}
-\item{postLAMRReq }{currently an XMLtree with the metadata for each match, but there will be a parser for this too}
+\item{postLAMRReq }{a dataframe with the metadata for each query. note that LAMR returns query results out of the original order, if you post multiple queries at once. Use the id variable to trace results back to the original query.}
 
 }
 \author{

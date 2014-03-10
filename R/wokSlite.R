@@ -2,15 +2,16 @@
 #LAMR
 #LAMR can handle multiple queries per request
 {
-makeLAMRQry = function(d, validFields = c('atitle','stitle','year')) {
+makeLAMRQry = function(d, id,validFields = c('atitle','stitle','year')) {
   #one line in d = one queryid
+  if (missing(id))   d$id = row.names(d) else d$id = d[,id]
+                      
   vars = intersect(names(d),validFields)
   if (length(vars) == 0) stop(paste('variable names must be one or more of',paste(validFields,collapse=',')))
   
-  d    = d[,vars]
-  d$id = row.names(d)
-  
-  qry = reshape(d,varying = c(vars),
+  d    = d[,c(vars,'id')]
+ 
+    qry = reshape(d,varying = c(vars),
                 v.names = 'val',
                 timevar = 'thing',
                 times = c(vars),
@@ -47,7 +48,7 @@ postLAMRReq = function(qry,url    = "https://ws.isiknowledge.com/cps/xrpc") {
   qsplit = split(qry,qry$id)
   cids = ''
   for (i in 1:length(qsplit)) {
-    top = paste0('<map name="id_',i,'">')
+    top = paste0('<map name="id_',qsplit[[i]]$id[1],'">')
     body = paste0('<val name="',qsplit[[i]]$thing,'">',qsplit[[i]]$val,'</val>',collapse='')
     end = '</map>'
     cids = paste0(cids,top,body,end)
@@ -65,11 +66,13 @@ postLAMRReq = function(qry,url    = "https://ws.isiknowledge.com/cps/xrpc") {
   
   resList = getNodeSet(res,'/*["fn"]/*["map"]/*["map"]/*["map"]')
   
-  out = lapply(resList, function(x) {d = getNodeSet(x,'//*["map"]/*["map"]/*["val"]')
+  out = lapply(resList, function(x) {
+                               id = as.character(gsub('id_','',xmlAttrs(x)))
+                               d = getNodeSet(x,'//*["map"]/*["map"]/*["val"]')
                                values = lapply(d,xmlValue)
                                names =lapply(d,xmlAttrs)
-                               d = data.frame(values,stringsAsFactors=FALSE)
-                               names(d) = unlist(names)
+                               d = data.frame(id,values,stringsAsFactors=FALSE)
+                               names(d) = c('id',unlist(names))
                                return(d)
                              })
   #lapply(xmlToList(res),function(x) d = rbind(x)
@@ -176,6 +179,7 @@ wokParseResult = function(res, nodes){
                               y[[i]] = y[[i]][-1]
                               d[[i]] = data.frame(do.call(cbind,y[[i]]),stringsAsFactors = FALSE)
                             } else d[i] = data.frame(cbind(y[i]),stringsAsFactors = FALSE) #variable name is tag name
+                            if (length(names(d[[i]])) ==0) d[i]=NA
                           }
                           d = do.call(cbind,d)
                         })
