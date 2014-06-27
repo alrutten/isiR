@@ -212,3 +212,4 @@ uidGet = function(uids,SID = getWokSID()) {
                 body = body)
   dd = wokParseResult(d, nodes = "//records")
   return(dd)
+}
