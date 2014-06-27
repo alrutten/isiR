@@ -203,3 +203,12 @@ wokParseResult = function(res, nodes){
   #return(rbind.fill(rec))
 # }
 }  
+uidGet = function(uids,SID = getWokSID()) {
+  soapHead = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\nxmlns:woksearch=\"http://woksearchlite.v3.wokmws.thomsonreuters.com\">\n<soapenv:Header/>\n<soapenv:Body>\n<woksearch:retrieveById>\n<databaseId>WOS</databaseId>"
+  qry = paste0("<uid>WOS:",uids,"</uid>")
+  soapFoot = paste0("<queryLanguage>en</queryLanguage><retrieveParameters><firstRecord>1</firstRecord><count>",length(uids),"</count></retrieveParameters></woksearch:retrieveById></soapenv:Body></soapenv:Envelope>")
+  body = paste0(soapHead, paste(qry,collapse = ''),soapFoot)
+  d = wokGetRes(header = makeWokHeader(SID = SID), 
+                body = body)
+  dd = wokParseResult(d, nodes = "//records")
+  return(dd)
