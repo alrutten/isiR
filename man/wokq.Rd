@@ -9,7 +9,7 @@
 query web of knowledge
 }
 \description{
-query web of knowledge using searchLite (to do a keyword search) or to retrieve metadata for certain references (using LAMR, link article match retrieval)
+query web of knowledge using searchLite (to do a keyword search) or RetrieveByID to find references with known web of knowledge ID, or to retrieve metadata for certain references (using LAMR, link article match retrieval)
 }
 \usage{
 wokq(qry, nmatches = 50, first = 1, SID = getWokSID())
