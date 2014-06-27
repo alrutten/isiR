@@ -3,7 +3,7 @@
 \alias{isiR}
 \alias{postLAMRReq}
 \alias{makeLAMRQry}
-\alias(uidGet}
+\alias{uidGet}
 
 \title{
 query web of knowledge
@@ -21,7 +21,7 @@ uidGet(uids,SID = getWokSID())
   \item{qry (wokq)}{
 wokq: a querystring as requested by web of knowledge. Valid fields are AU,PY,SO,SU,TI,TS,DO for author, publication year, source, subject, title, topic, and doi respectively. See web of knowledge documentation for all operators and options available. example string: 'TS = "extra-pair". uses wokSearchLite soap service.
 }
-\item{qry (uidGet)}{
+\item{uids (uidGet)}{
 uids: uid -Web of knowledge unique identifier- to retrieve. Can also handle vector of uids. Uses retrieveById soap service. currently only retrieves uid's from WOS database.
 }
   \item{qry (LAMR)}{
