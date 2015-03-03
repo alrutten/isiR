@@ -14,7 +14,7 @@ gsSearch = function(searchterm='extra-pair bird', nhits = 30) {
                                                    title   = paste0(unlist(xpathApply(x,".//h3",xmlValue)   ),''),
                                                    pdflink = paste0(unlist(xpathApply(x,".//div[@class='gs_md_wp gs_ttss']/a",function(z) xmlGetAttr(z,name='href'))),''),
                                                    url     = paste0(unlist(xpathApply(x,".//h3/a",function(z) xmlGetAttr(z,name='href'))),'')
-    )
+                                                   stringsAsFactors = FALSE)
     )
     out = do.call(rbind,out)
     out$authors = gsub(' -.*','',out$AuSoY)
