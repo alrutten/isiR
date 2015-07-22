@@ -7,7 +7,7 @@ gsSearch = function(searchterm='extra-pair bird', nhits = 30) {
     url    = paste0('http://scholar.google.com/scholar?start=',i*10,'&hl=en&as_sdt=1,5&as_vis=1&q=', gsub(' ','+',searchterm),'&scisbd=1',collapse='')
     urlres = getURL(url)  
     
-    foo = htmlTreeParse(url,error=function(...){}, useInternalNodes = TRUE,encoding='utf-8')   
+    foo = htmlTreeParse(urlres,error=function(...){}, useInternalNodes = TRUE,encoding='utf-8')   
     
     fullresult = getNodeSet(foo,"//div[@class='gs_r']")
     out = lapply(fullresult,function(x) data.frame(AuSoY   = paste0(unlist(xpathSApply(x,".//div[@class='gs_a']",xmlValue)),''),
